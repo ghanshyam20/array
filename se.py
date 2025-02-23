@@ -40,3 +40,5 @@ plt.show()
 
 print(f"Intercept: {model.intercept_}")
 print(f"slope: {model.coef_[0]}")
+
+
