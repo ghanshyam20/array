@@ -1,67 +1,62 @@
-import matplotlib.pyplot as plt
-
-# Step 1: Load the CSV file
 import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
-file_path = 'wt ht.csv'  # Your file name
-df = pd.read_csv(file_path)
+# Load the dataset
+data = pd.read_csv('Admission_Predict.csv')
 
-# Step 2: Extract height and weight columns
-height = df["Height"].tolist()
-weight = df["Weight"].tolist()
+# Check column names
+print("Columns in the dataset:", data.columns)
 
-# Step 3: Min-Max Normalization (Scaling values between 0 and 1)
-min_height, max_height = min(height), max(height)
-min_weight, max_weight = min(weight), max(weight)
+# Strip any leading/trailing spaces from column names
+data.columns = data.columns.str.strip()
 
-height_normalized = [(x - min_height) / (max_height - min_height) for x in height]
-weight_normalized = [(x - min_weight) / (max_weight - min_weight) for x in weight]
+# Check column names again
+print("Columns after stripping spaces:", data.columns)
 
-# Step 4: Z-score Standardization (Mean = 0, Std Dev = 1)
-mean_height = sum(height) / len(height)
-std_height = (sum((x - mean_height) ** 2 for x in height) / len(height)) ** 0.5
+# Ensure the required columns exist
+required_columns = ['Chance of Admit', 'Serial No.']
+if not all(col in data.columns for col in required_columns):
+    raise KeyError(f"Required columns {required_columns} not found in dataset.")
 
-mean_weight = sum(weight) / len(weight)
-std_weight = (sum((x - mean_weight) ** 2 for x in weight) / len(weight)) ** 0.5
+# Features and target variable
+X = data.drop(columns=['Chance of Admit', 'Serial No.'])
+y = data['Chance of Admit']
 
-height_standardized = [(x - mean_height) / std_height for x in height]
-weight_standardized = [(x - mean_weight) / std_weight for x in weight]
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Step 5: Create a new DataFrame to store results
-df_results = pd.DataFrame({
-    "Original Height": height,
-    "Normalized Height": height_normalized,
-    "Standardized Height": height_standardized,
-    "Original Weight": weight,
-    "Normalized Weight": weight_normalized,
-    "Standardized Weight": weight_standardized
-})
+# Model for normal data
+model_normal = LinearRegression()
+model_normal.fit(X_train, y_train)
+y_pred_normal = model_normal.predict(X_test)
+r2_normal = r2_score(y_test, y_pred_normal)
 
-# Step 6: Plot Histograms to visualize the data
+# Normalize the data (Min-Max scaling)
+scaler_minmax = MinMaxScaler()
+X_train_minmax = scaler_minmax.fit_transform(X_train)
+X_test_minmax = scaler_minmax.transform(X_test)
 
-plt.figure(figsize=(15, 5))
+# Model for normalized data
+model_minmax = LinearRegression()
+model_minmax.fit(X_train_minmax, y_train)
+y_pred_minmax = model_minmax.predict(X_test_minmax)
+r2_minmax = r2_score(y_test, y_pred_minmax)
 
-# Histogram for Original Data
-plt.subplot(1, 3, 1)
-plt.hist(df_results["Original Height"], bins=30, alpha=0.7, label="Height", color="blue")
-plt.hist(df_results["Original Weight"], bins=30, alpha=0.7, label="Weight", color="orange")
-plt.title("Original Data")
-plt.legend()
+# Standardize the data (Z-score standardization)
+scaler_standard = StandardScaler()
+X_train_standard = scaler_standard.fit_transform(X_train)
+X_test_standard = scaler_standard.transform(X_test)
 
-# Histogram for Normalized Data
-plt.subplot(1, 3, 2)
-plt.hist(df_results["Normalized Height"], bins=30, alpha=0.7, label="Height", color="blue")
-plt.hist(df_results["Normalized Weight"], bins=30, alpha=0.7, label="Weight", color="orange")
-plt.title("Normalized Data (Min-Max)")
-plt.legend()
+# Model for standardized data
+model_standard = LinearRegression()
+model_standard.fit(X_train_standard, y_train)
+y_pred_standard = model_standard.predict(X_test_standard)
+r2_standard = r2_score(y_test, y_pred_standard)
 
-# Histogram for Standardized Data
-plt.subplot(1, 3, 3)
-plt.hist(df_results["Standardized Height"], bins=30, alpha=0.7, label="Height", color="blue")
-plt.hist(df_results["Standardized Weight"], bins=30, alpha=0.7, label="Weight", color="orange")
-plt.title("Standardized Data (Z-score)")
-plt.legend()
-
-# Display all histograms
-plt.tight_layout()
-plt.show()
+# Print the R² scores
+print(f"R² score for normal data: {r2_normal}")
+print(f"R² score for normalized data: {r2_minmax}")
+print(f"R² score for standardized data: {r2_standard}")
