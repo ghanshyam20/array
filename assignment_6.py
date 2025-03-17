@@ -83,3 +83,4 @@ print(f"   - At k=7, accuracy was {accuracy_score(y_test, KNeighborsClassifier(n
 print("3. Logistic Regression is faster to train and more interpretable, making it a better choice for this problem.")
 print("4. KNN might perform better with feature scaling or more tuning, but it is generally slower and less efficient for larger datasets.")
 print("5. The correlation heatmap showed that some features (e.g., 'poutcome') had a stronger relationship with the target variable 'y'.")
+

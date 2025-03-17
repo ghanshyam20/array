@@ -1,28 +1,62 @@
-from sklearn import datasets
+import numpy as np
+
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score
 
-# I loaded this really cool dataset called 'Iris', with 150 flower samples!
-iris = datasets.load_iris()
-X = iris.data  # This has all the features, like petal length and width
-y = iris.target  # These are the flower types (Setosa, Versicolor, Virginica)
 
-# I split the data into training and testing sets, so the model can learn and then test how well it learned.
+
+
+# Manually creating 10 data points (time,location,amount)
+
+X=np.array([[10, 1, 100],   # Legit transaction
+    [15, 2, 150],   # Legit transaction
+    [20, 3, 200],   # Legit transaction
+    [25, 1, 3000],  # Fraud transaction
+    [30, 2, 3500],  # Fraud transaction
+    [35, 3, 4000],  # Fraud transaction
+    [40, 1, 500],   # Legit transaction
+    [45, 2, 600],   # Legit transaction
+    [50, 3, 5500],  # Fraud transaction
+    [55, 1, 7000],
+      ])  # Fraud transaction
+
+
+
+
+#labels (0=legit, 1=fraud)
+
+
+y=np.array([0, 0, 0, 1, 1, 1, 0, 0, 1, 1])
+
+
+
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# Now, I had to scale the data (because SVM likes it when everything is on the same scale)
+# Scale the data
 scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)  # Fit and transform the training data
-X_test = scaler.transform(X_test)  # Just transform the test data, not fit
 
-# Here comes the cool part: I created a Support Vector Machine (SVM) model using the RBF kernel. It's awesome for complex data!
-svm = SVC(kernel='rbf')  # RBF kernel is like magic for this kind of task
-svm.fit(X_train, y_train)  # I trained the model with the training data
+# Fit and transform the training data
+X_train = scaler.fit_transform(X_train)
 
-# Time to test if the model is any good!
-y_pred = svm.predict(X_test)  # The model makes predictions on the test data
+# Transform the test data (use the same scaler)
+X_test = scaler.transform(X_test)
 
-# Look at what the model predicted and compare it with the actual labels!
-print("Predictions:", y_pred)  # This is the model's guess
-print("Actual Labels:", y_test)  # This is what the real labels were
+# Create the SVM model
+svm = SVC(kernel='rbf')  # Use RBF kernel
+
+# Train the model
+svm.fit(X_train, y_train)
+
+# Make predictions
+y_pred = svm.predict(X_test)
+
+# Calculate accuracy
+accuracy = accuracy_score(y_test, y_pred)
+
+# Print the results
+print("Predictions:", y_pred)
+print("Actual Labels:", y_test)
+print("Accuracy:", accuracy * 100, "%")

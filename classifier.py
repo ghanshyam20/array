@@ -26,3 +26,11 @@ groups = [
 classes = [0, 1]
 gini = gini_index(groups, classes)
 print(f'Gini Index: {gini}')
+
+
+
+
+# the true positive rate (TPR) and false positive rate (FPR) are defined as follows:
+
+
+# how can we calculate the 
